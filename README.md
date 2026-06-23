@@ -12,8 +12,10 @@ A full-stack social feed assignment inspired by TaskPlanet's Social page. Users 
 ## Project Structure
 
 ```text
-backend/   Express API, MongoDB models, auth, post routes
-frontend/  React app and responsive TaskPlanet-inspired UI
+backend/      Express API, MongoDB models, auth, post routes
+frontend/     React app and responsive TaskPlanet-inspired UI
+netlify.toml  Netlify build config for the frontend
+render.yaml   Render blueprint for the backend
 ```
 
 ## Local Setup
@@ -32,7 +34,19 @@ cp backend/.env.example backend/.env
 
 Update `backend/.env` with your MongoDB connection string and JWT secret.
 
-3. Start both apps:
+3. Configure frontend environment:
+
+```bash
+cp frontend/.env.example frontend/.env
+```
+
+For local development, keep:
+
+```text
+VITE_API_URL=http://localhost:8000/api
+```
+
+4. Start both apps:
 
 ```bash
 npm run dev
@@ -42,13 +56,18 @@ Frontend runs at `http://localhost:3000` and backend runs at `http://localhost:8
 
 Open the frontend URL in your browser. The backend URL is only for API responses.
 
-## Deployment
+## Deployment Structure
+
+This repo is ready to deploy as two separate services:
+
+- Frontend: Netlify, using `frontend/` as the app directory.
+- Backend: Render, using `backend/` as the service root.
 
 ### Backend on Render
 
 1. Push this repository to GitHub.
-2. In Render, create a new **Web Service** from the GitHub repository.
-3. Use these settings if you create the service manually:
+2. In Render, create a new **Blueprint** from the repository if you want to use `render.yaml`, or create a new **Web Service** manually.
+3. If creating the service manually, use:
 
 ```text
 Root Directory: backend
@@ -62,7 +81,7 @@ Start Command: npm start
 ```text
 MONGO_URI=your MongoDB Atlas connection string
 JWT_SECRET=a long random secret
-CLIENT_URL=your deployed frontend URL, for example https://your-app.vercel.app
+CLIENT_URL=your deployed Netlify frontend URL, for example https://your-app.netlify.app
 ```
 
 Do not set `PORT` on Render. Render provides it automatically, and the backend already reads `process.env.PORT`.
@@ -79,10 +98,25 @@ The frontend API URL should include `/api`:
 VITE_API_URL=https://your-render-service.onrender.com/api
 ```
 
-### Frontend
+### Frontend on Netlify
 
-- Deploy `frontend/` to Vercel or Netlify.
-- Set `VITE_API_URL` in the frontend deployment to the Render backend API URL.
+1. Push this repository to GitHub.
+2. In Netlify, create a new site from the GitHub repository.
+3. Netlify can read the root `netlify.toml`, which sets:
+
+```text
+Base directory: frontend
+Build command: npm run build
+Publish directory: frontend/dist
+```
+
+4. Add this Netlify environment variable:
+
+```text
+VITE_API_URL=https://your-render-service.onrender.com/api
+```
+
+5. After Netlify deploys, copy the Netlify site URL and set it as `CLIENT_URL` in Render, then redeploy the backend.
 
 ## Features
 
